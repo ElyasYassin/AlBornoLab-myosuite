@@ -47,6 +47,7 @@ class BaseV0(env_base.MujocoEnv):
         self.muscle_condition = muscle_condition
         self.fatigue_reset_vec = fatigue_reset_vec
         self.fatigue_reset_random = fatigue_reset_random
+        self.action_noise_sigma = 1  # tune as needed; 0 disables
         self.frame_skip = frame_skip
         self.initializeConditions()
         super()._setup(
@@ -64,6 +65,10 @@ class BaseV0(env_base.MujocoEnv):
     
     # step the simulation forward
     def step(self, a, **kwargs):
+        # noisy = a + self.action_noise_sigma * np.random.randn(*a.shape)
+        # # actions here are expected in normalized Box(-1, 1); clip accordingly
+        # a = np.clip(noisy, -1.0, 1.0)
+
         muscle_a = a.copy()
         muscle_act_ind = self.sim.model.actuator_dyntype == mujoco.mjtDyn.mjDYN_MUSCLE
         # Explicitely project normalized space (-1,1) to actuator space (0,1) if muscles

@@ -6,14 +6,13 @@ from myosuite.envs.myo.base_v0 import BaseV0
 
 
 class ReachEnvV0(BaseV0):
-    DEFAULT_OBS_KEYS = ['time','hand_qpos', 'hand_qvel', 'obj_pos', 'reach_err']#['hand_qpos', 'hand_qvel', 
+    DEFAULT_OBS_KEYS = ['time','hand_qpos', 'hand_qvel','act','obj_pos', 'reach_err']#['hand_qpos', 'hand_qvel', 
     DEFAULT_RWD_KEYS_AND_WEIGHTS = {
     'reach': 1.0,     # primary driver
     'vel':   0.8,     # bell‐curve shaping
     'act': 0.5,
-    # 'penalty': 1,
     }
-    DELAY = 3 # Delay in timesteps
+    DELAY = 0 # Delay in timesteps
     
     def __init__(self, model_path, obsd_model_path=None, seed=None, **kwargs):
         gym.utils.EzPickle.__init__(self, model_path, obsd_model_path, seed, **kwargs)
@@ -79,14 +78,15 @@ class ReachEnvV0(BaseV0):
         obs_dict['time'] = np.array([sim.data.time])
         obs_dict['hand_qpos'] = sim.data.qpos[:].copy()
         obs_dict['hand_qvel'] = sim.data.qvel[:].copy() * self.dt
-        obs_dict['fiber_length'] = sim.data.actuator_length[:].copy()
-        obs_dict['fiber_velocity'] = sim.data.actuator_velocity[:].copy() * self.dt
+        # obs_dict['fiber_length'] = sim.data.actuator_length[:].copy()
+        # obs_dict['fiber_velocity'] = sim.data.actuator_velocity[:].copy() * self.dt
         if sim.model.na > 0:
             obs_dict['act'] = sim.data.act[:].copy()
         # reach error
         obs_dict['obj_pos'] = sim.data.site_xpos[self.object_sid]
         obs_dict['palm_pos'] = sim.data.site_xpos[self.palm_sid]
         obs_dict['reach_err'] = np.array(obs_dict['palm_pos']) - np.array(obs_dict['obj_pos'])
+
         return obs_dict
     
     def get_reward_dict(self, obs_dict):   
